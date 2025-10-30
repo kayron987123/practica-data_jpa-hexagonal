@@ -1,0 +1,57 @@
+package com.gad.spring_data_jpa.department.application.application.service;
+
+import com.gad.spring_data_jpa.department.application.application.ports.input.DepartmentUseCase;
+import com.gad.spring_data_jpa.department.application.application.ports.input.dto.CreateDepartmentCommand;
+import com.gad.spring_data_jpa.department.application.application.ports.input.dto.DepartmentDto;
+import com.gad.spring_data_jpa.department.application.application.ports.input.dto.UpdateDepartmentCommand;
+import com.gad.spring_data_jpa.department.application.application.ports.output.DepartmentPersistencePort;
+import com.gad.spring_data_jpa.department.domain.model.Department;
+import com.gad.spring_data_jpa.department.domain.model.DepartmentNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class DepartmentService implements DepartmentUseCase {
+    private final DepartmentPersistencePort persistencePort;
+
+    @Override
+    public DepartmentDto createCourse(CreateDepartmentCommand command) {
+        var department = persistencePort.save(new Department(command.name(), command.faculty()));
+        return new DepartmentDto(department.name(), department.faculty());
+    }
+
+    @Override
+    public DepartmentDto getCourseById(Long departmentId) {
+        var department = persistencePort.findById(departmentId)
+                .orElseThrow(() -> new DepartmentNotFoundException("Department not found with id: " + departmentId));
+        return new DepartmentDto(department.name(), department.faculty());
+    }
+
+    @Override
+    public DepartmentDto updateCourse(Long departmentId, UpdateDepartmentCommand command) {
+        var departmentDb = persistencePort.findById(departmentId)
+                .orElseThrow(() -> new DepartmentNotFoundException("Department not found with id: " + departmentId));
+        var departmentToUpdate = departmentDb.withName(command.name())
+                .withFaculty(command.faculty());
+        var departmentUpdated = persistencePort.save(departmentToUpdate);
+        return new DepartmentDto(departmentUpdated.name(), departmentUpdated.faculty());
+    }
+
+    @Override
+    public List<DepartmentDto> getAllCourses() {
+        return persistencePort.findAll()
+                .stream()
+                .map(department -> new DepartmentDto(department.name(), department.faculty()))
+                .toList();
+    }
+
+    @Override
+    public void deleteCourseById(Long departmentId) {
+        var department = persistencePort.findById(departmentId)
+                .orElseThrow(() -> new DepartmentNotFoundException("Department not found with id: " + departmentId));
+        persistencePort.deleteById(departmentId);
+    }
+}

@@ -1,0 +1,17 @@
+services:
+  postgres-university:
+    container_name: postgres-university
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gad
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=university_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data_university:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_university:
