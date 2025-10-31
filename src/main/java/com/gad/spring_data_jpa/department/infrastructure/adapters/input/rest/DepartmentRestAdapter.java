@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("departments")
+@RequestMapping("/departments")
 public class DepartmentRestAdapter {
     private final DepartmentUseCase departmentUseCase;
     private final DepartmentRestMapper departmentRestMapper;
@@ -50,7 +50,7 @@ public class DepartmentRestAdapter {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<DataResponse<DepartmentResponse>> getAllDepartmentsByName(@RequestParam String name) {
         DepartmentDto departmentDto = departmentUseCase.getDepartmentByName(name);
         DepartmentResponse departmentResponse = departmentRestMapper.dtoToResponse(departmentDto);
