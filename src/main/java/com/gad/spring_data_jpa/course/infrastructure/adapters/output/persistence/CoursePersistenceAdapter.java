@@ -6,13 +6,14 @@ import com.gad.spring_data_jpa.course.domain.model.Course;
 import com.gad.spring_data_jpa.course.infrastructure.adapters.output.persistence.entity.CourseEntity;
 import com.gad.spring_data_jpa.course.infrastructure.adapters.output.persistence.mapper.CourseMapper;
 import com.gad.spring_data_jpa.course.infrastructure.adapters.output.persistence.repository.CourseRepository;
-import com.gad.spring_data_jpa.department.domain.model.DepartmentNotFoundException;
+import com.gad.spring_data_jpa.department.domain.exception.DepartmentNotFoundException;
 import com.gad.spring_data_jpa.department.infrastructure.adapters.output.persistence.entity.DepartmentEntity;
 import com.gad.spring_data_jpa.department.infrastructure.adapters.output.persistence.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -24,12 +25,15 @@ public class CoursePersistenceAdapter implements CoursePersistencePort {
 
     @Override
     public Course save(Course course) {
-        CourseEntity courseEntity = courseRepository.save(courseMapper.courseToEntity(course));
+        DepartmentEntity department = departmentRepository.findByNameContainingIgnoreCase(course.departmentName())
+                .orElseThrow(() -> new DepartmentNotFoundException("Department not found with name: " + course.departmentName()));
 
-        Course courseMapped = courseMapper.entityToCourse(courseEntity);
+        CourseEntity courseToSave = courseMapper.courseToEntity(course);
+        courseToSave.setDepartment(department);
 
-        DepartmentEntity department = departmentRepository.findById(courseEntity.getDepartment().getId())
-                .orElseThrow(() -> new DepartmentNotFoundException("Department not found with id: " + courseEntity.getDepartment().getId()));
+        CourseEntity courseSaved = courseRepository.save(courseToSave);
+
+        Course courseMapped = courseMapper.entityToCourse(courseSaved);
 
         courseMapped.withDepartmentName(department.getName());
 
@@ -51,10 +55,10 @@ public class CoursePersistenceAdapter implements CoursePersistencePort {
     }
 
     @Override
-    public List<Course> findAll() {
-        List<CourseEntity> courseEntities = courseRepository.findAll();
+    public Page<Course> findAll(Pageable pageable) {
+        Page<CourseEntity> courseEntities = courseRepository.findAll(pageable);
 
-        return courseEntities.stream().map(courseEntity -> {
+        return courseEntities.map(courseEntity -> {
             DepartmentEntity department = departmentRepository.findById(courseEntity.getDepartment().getId())
                     .orElseThrow(() -> new DepartmentNotFoundException("Department not found with id: " + courseEntity.getDepartment().getId()));
 
@@ -62,7 +66,7 @@ public class CoursePersistenceAdapter implements CoursePersistencePort {
             courseMapped.withDepartmentName(department.getName());
 
             return courseMapped;
-        }).toList();
+        });
     }
 
     @Override

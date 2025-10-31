@@ -3,6 +3,7 @@ package com.gad.spring_data_jpa.department.domain.model;
 import java.util.Objects;
 
 public record Department(
+        Long id,
         String name,
         String faculty
 ) {
@@ -19,16 +20,16 @@ public record Department(
         }
     }
 
-    public static Department create(String name, String faculty) {
-        return new Department(name.trim(), faculty.trim());
+    public static Department create(Long id, String name, String faculty) {
+        return new Department(id, name.trim(), faculty.trim());
     }
 
     public Department withName(String newName) {
-        return new Department(Objects.requireNonNull(newName, "Name cannot be null").trim(), this.faculty);
+        return new Department(this.id, Objects.requireNonNull(newName, "Name cannot be null").trim(), this.faculty);
     }
 
     public Department withFaculty(String newFaculty) {
-        return new Department(this.name, Objects.requireNonNull(newFaculty, "Faculty cannot be null").trim());
+        return new Department(this.id, this.name, Objects.requireNonNull(newFaculty, "Faculty cannot be null").trim());
     }
 
     public boolean belongsToFaculty(String facultyName) {

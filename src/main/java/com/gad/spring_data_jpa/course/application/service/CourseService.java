@@ -9,9 +9,10 @@ import com.gad.spring_data_jpa.course.domain.exception.CourseNotFoundException;
 import com.gad.spring_data_jpa.course.domain.model.Course;
 import com.gad.spring_data_jpa.department.application.application.ports.output.DepartmentPersistencePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,16 +61,14 @@ public class CourseService implements CourseUseCase {
     }
 
     @Override
-    public List<CourseDto> getAllCourses() {
-        var courses = persistencePort.findAll();
-        return courses.stream()
-                .map(course -> {
-                    var department = departmentPersistencePort.findByName(course.departmentName())
-                            .orElseThrow(() -> new RuntimeException("Department not found with name: " + course.departmentName()));
+    public Page<CourseDto> getAllCourses(Pageable pageable) {
+        var courses = persistencePort.findAll(pageable);
+        return courses.map(course -> {
+            var department = departmentPersistencePort.findByName(course.departmentName())
+                    .orElseThrow(() -> new RuntimeException("Department not found with name: " + course.departmentName()));
 
-                    return new CourseDto(course.id(), course.name(), course.credits(), course.departmentName(), department.faculty());
-                })
-                .toList();
+            return new CourseDto(course.id(), course.name(), course.credits(), course.departmentName(), department.faculty());
+        });
     }
 
     @Override

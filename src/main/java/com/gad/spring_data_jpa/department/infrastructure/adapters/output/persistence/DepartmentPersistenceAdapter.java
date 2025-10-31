@@ -2,7 +2,7 @@ package com.gad.spring_data_jpa.department.infrastructure.adapters.output.persis
 
 import com.gad.spring_data_jpa.department.application.application.ports.output.DepartmentPersistencePort;
 import com.gad.spring_data_jpa.department.domain.model.Department;
-import com.gad.spring_data_jpa.department.domain.model.DepartmentNotFoundException;
+import com.gad.spring_data_jpa.department.domain.exception.DepartmentNotFoundException;
 import com.gad.spring_data_jpa.department.infrastructure.adapters.output.persistence.entity.DepartmentEntity;
 import com.gad.spring_data_jpa.department.infrastructure.adapters.output.persistence.mapper.DepartmentMapper;
 import com.gad.spring_data_jpa.department.infrastructure.adapters.output.persistence.repository.DepartmentRepository;
@@ -48,7 +48,7 @@ public class DepartmentPersistenceAdapter implements DepartmentPersistencePort {
 
     @Override
     public Optional<Department> findByName(String name) {
-        return departmentRepository.findDepartmentEntityByName(name)
+        return departmentRepository.findByNameContainingIgnoreCase(name)
                 .map(departmentMapper::entityToDepartment);
     }
 }

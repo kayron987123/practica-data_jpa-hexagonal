@@ -12,14 +12,9 @@ public record Course(
     private static final int MAX_CREDITS = 10;
 
     public Course {
-        Objects.requireNonNull(id, "id is null");
         Objects.requireNonNull(name, "Course name cannot be null");
         Objects.requireNonNull(credits, "Course credits cannot be null");
         Objects.requireNonNull(departmentName, "Course department name cannot be null");
-
-        if (id <= 0) {
-            throw new IllegalArgumentException("Course id cannot be 0 or negative");
-        }
 
         if (name.isBlank()) {
             throw new IllegalArgumentException("Course name cannot be blank");

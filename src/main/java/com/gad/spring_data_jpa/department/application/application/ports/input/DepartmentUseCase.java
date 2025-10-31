@@ -8,13 +8,10 @@ import com.gad.spring_data_jpa.department.application.application.ports.input.dt
 import java.util.List;
 
 public interface DepartmentUseCase {
-    DepartmentDto createCourse(CreateDepartmentCommand command);
-
-    DepartmentDto getCourseById(Long departmentId);
-
-    DepartmentDto updateCourse(Long departmentId, UpdateDepartmentCommand command);
-
-    List<DepartmentDto> getAllCourses();
-
-    void deleteCourseById(Long departmentId);
+    DepartmentDto createDepartment(CreateDepartmentCommand command);
+    DepartmentDto getDepartmentById(Long departmentId);
+    DepartmentDto updateDepartment(Long departmentId, UpdateDepartmentCommand command);
+    List<DepartmentDto> getAllDepartments();
+    void deleteDepartmentById(Long departmentId);
+    DepartmentDto getDepartmentByName(String departmentName);
 }
