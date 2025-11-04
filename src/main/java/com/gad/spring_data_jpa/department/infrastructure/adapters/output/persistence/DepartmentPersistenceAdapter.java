@@ -48,7 +48,9 @@ public class DepartmentPersistenceAdapter implements DepartmentPersistencePort {
 
     @Override
     public Optional<Department> findByName(String name) {
-        return departmentRepository.findByNameContainingIgnoreCase(name)
-                .map(departmentMapper::entityToDepartment);
+        DepartmentEntity departmentEntity = departmentRepository.findByNameContainingIgnoreCase(name)
+                .orElseThrow(() -> new DepartmentNotFoundException("Department not found with name: " + name));
+
+        return Optional.of(departmentMapper.entityToDepartment(departmentEntity));
     }
 }
