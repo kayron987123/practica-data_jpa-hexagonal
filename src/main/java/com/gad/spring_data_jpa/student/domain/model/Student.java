@@ -1,10 +1,13 @@
 package com.gad.spring_data_jpa.student.domain.model;
 
 
+import lombok.Builder;
+
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@Builder
 public record Student(
         String fullName,
         String email,
