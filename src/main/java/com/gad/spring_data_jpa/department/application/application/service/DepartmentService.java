@@ -25,9 +25,9 @@ public class DepartmentService implements DepartmentUseCase {
 
     @Override
     public DepartmentDto getDepartmentById(Long departmentId) {
-        var department = persistencePort.findById(departmentId)
+        return  persistencePort.findById(departmentId)
+                .map(department -> new DepartmentDto(department.id(), department.name(), department.faculty()))
                 .orElseThrow(() -> new DepartmentNotFoundException("Department not found with id: " + departmentId));
-        return new DepartmentDto(department.id(), department.name(), department.faculty());
     }
 
     @Override

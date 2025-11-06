@@ -17,17 +17,15 @@ public interface CourseTeacherMapper {
 
         CourseTeacherEntity entity = new CourseTeacherEntity();
 
-        // Asignamos IDs embebidos
-        var id = new CourseTeacherId();
+        CourseTeacherId id = new CourseTeacherId();
         id.setCourseId(assignment.courseId());
         id.setTeacherId(assignment.teacherId());
         entity.setId(id);
 
-        // Asignamos entidades con solo el ID
-        var course = new CourseEntity();
+        CourseEntity course = new CourseEntity();
         course.setId(assignment.courseId());
 
-        var teacher = new TeacherEntity();
+        TeacherEntity teacher = new TeacherEntity();
         teacher.setId(assignment.teacherId());
 
         entity.setCourse(course);

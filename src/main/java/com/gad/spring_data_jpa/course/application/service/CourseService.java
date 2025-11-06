@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -20,6 +21,7 @@ public class CourseService implements CourseUseCase {
     private final CoursePersistencePort persistencePort;
     private final DepartmentPersistencePort departmentPersistencePort;
 
+    @Transactional
     @Override
     public CourseDto createCourse(CreateCourseCommand command) {
         Course course = Course.create(null, command.name(), command.credits(), command.departmentName());
@@ -42,6 +44,7 @@ public class CourseService implements CourseUseCase {
         return new CourseDto(courseFound.id(), courseFound.name(), courseFound.credits(), courseFound.departmentName(), department.faculty());
     }
 
+    @Transactional
     @Override
     public CourseDto updateCourse(Long courseId, UpdateCourseCommand command) {
         Course courseSaved = persistencePort.findById(courseId)
@@ -71,6 +74,7 @@ public class CourseService implements CourseUseCase {
         });
     }
 
+    @Transactional
     @Override
     public void deleteCourseById(Long courseId) {
         var courseToDelete = persistencePort.findById(courseId)

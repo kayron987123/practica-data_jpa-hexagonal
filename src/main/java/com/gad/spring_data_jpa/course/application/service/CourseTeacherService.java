@@ -1,7 +1,7 @@
 package com.gad.spring_data_jpa.course.application.service;
 
 import com.gad.spring_data_jpa.course.application.ports.input.CourseTeacherUseCase;
-import com.gad.spring_data_jpa.course.application.ports.input.dto.CourseTeacherDto;
+import com.gad.spring_data_jpa.course.application.ports.input.dto.*;
 import com.gad.spring_data_jpa.course.application.ports.output.CoursePersistencePort;
 import com.gad.spring_data_jpa.course.application.ports.output.CourseTeacherPersistencePort;
 import com.gad.spring_data_jpa.course.domain.exception.CourseNotFoundException;
@@ -13,6 +13,7 @@ import com.gad.spring_data_jpa.teacher.domain.model.Teacher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,11 +26,13 @@ public class CourseTeacherService implements CourseTeacherUseCase {
     private final CoursePersistencePort coursePersistencePort;
     private final TeacherPersistencePort teacherPersistencePort;
 
+    @Transactional
     @Override
     public CourseTeacherDto assignCourseToTeacher(Long teacherId, Long courseId) {
         return assignCourseAndTeacher(teacherId, courseId);
     }
 
+    @Transactional
     @Override
     public CourseTeacherDto updateCourseToTeacher(Long teacherId, Long courseId) {
         return assignCourseAndTeacher(teacherId, courseId);
@@ -64,6 +67,7 @@ public class CourseTeacherService implements CourseTeacherUseCase {
                 .build();
     }
 
+    @Transactional
     @Override
     public void deleteCourseFromTeacher(Long idCourse, Long idTeacher) {
         Course course = coursePersistencePort.findById(idCourse)
@@ -76,46 +80,54 @@ public class CourseTeacherService implements CourseTeacherUseCase {
     }
 
     @Override
-    public List<CourseTeacherDto> getCoursesByTeacherId(Long teacherId) {
-        return courseTeacherPersistencePort.findCoursesAssignedToTeachers(teacherId)
+    public CoursesTeacherList getCoursesByTeacherId(Long teacherId) {
+        Teacher teacher = teacherPersistencePort.findById(teacherId)
+                .orElseThrow(() -> new TeacherNotFoundException("Teacher with id " + teacherId + " not found"));
+
+        List<CoursesTeacherDataList> courseDataList = courseTeacherPersistencePort.findCoursesAssignedToTeachers(teacherId)
                 .stream()
                 .map(courseTeacherAssignment -> {
                     Course course = coursePersistencePort.findById(courseTeacherAssignment.courseId())
                             .orElseThrow(() -> new CourseNotFoundException("Course with id " + courseTeacherAssignment.courseId() + " not found"));
 
-                    Teacher teacher = teacherPersistencePort.findById(courseTeacherAssignment.teacherId())
-                            .orElseThrow(() -> new TeacherNotFoundException("Teacher with id " + courseTeacherAssignment.teacherId() + " not found"));
-
-                    return CourseTeacherDto.builder()
+                    return CoursesTeacherDataList.builder()
                             .courseId(course.id())
-                            .teacherId(teacher.id())
                             .courseName(course.name())
-                            .teacherName(teacher.fullName())
                             .credits(course.credits())
-                            .department(course.departmentName())
+                            .departmentName(course.departmentName())
                             .build();
                 }).toList();
+
+        return CoursesTeacherList.builder()
+                .teacherId(teacher.id())
+                .teacherName(teacher.fullName())
+                .coursesDataList(courseDataList)
+                .build();
     }
 
     @Override
-    public List<CourseTeacherDto> getTeachersByCourseId(Long courseId) {
-        return courseTeacherPersistencePort.findTeachersAssignedToCourse(courseId)
+    public TeachersCourseList getTeachersByCourseId(Long courseId) {
+        Course course = coursePersistencePort.findById(courseId)
+                .orElseThrow(() -> new CourseNotFoundException("Course with id " + courseId + " not found"));
+
+        List<TeachersCourseDataList> teacherDataList= courseTeacherPersistencePort.findTeachersAssignedToCourse(courseId)
                 .stream()
                 .map(courseTeacherAssignment -> {
-                    Course course = coursePersistencePort.findById(courseTeacherAssignment.courseId())
-                            .orElseThrow(() -> new CourseNotFoundException("Course with id " + courseTeacherAssignment.courseId() + " not found"));
-
                     Teacher teacher = teacherPersistencePort.findById(courseTeacherAssignment.teacherId())
                             .orElseThrow(() -> new TeacherNotFoundException("Teacher with id " + courseTeacherAssignment.teacherId() + " not found"));
 
-                    return CourseTeacherDto.builder()
-                            .courseId(course.id())
+                    return TeachersCourseDataList.builder()
                             .teacherId(teacher.id())
-                            .courseName(course.name())
                             .teacherName(teacher.fullName())
-                            .credits(course.credits())
-                            .department(course.departmentName())
                             .build();
                 }).toList();
+
+        return TeachersCourseList.builder()
+                .courseId(course.id())
+                .courseName(course.name())
+                .credits(course.credits())
+                .departmentName(course.departmentName())
+                .teachersCourseDataLists(teacherDataList)
+                .build();
     }
 }

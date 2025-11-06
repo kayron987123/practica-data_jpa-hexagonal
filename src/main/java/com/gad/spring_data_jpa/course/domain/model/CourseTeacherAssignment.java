@@ -14,8 +14,8 @@ public record CourseTeacherAssignment(
     public CourseTeacherAssignment {
         Objects.requireNonNull(assignedDate, "Assigned date cannot be null");
 
-        if (assignedDate.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Assigned date cannot be in the past");
+        if (assignedDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Assigned date cannot be in the future");
         }
     }
 }
